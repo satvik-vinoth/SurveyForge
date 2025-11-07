@@ -24,6 +24,7 @@ export default function MySurveys() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const router = useRouter();
+  const baseurl = process.env.NEXT_PUBLIC_API_BASE_URL
 
   const fetchSurveys = async () => {
     const token = localStorage.getItem("token");
@@ -33,7 +34,7 @@ export default function MySurveys() {
     }
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/my-surveys", {
+      const res = await fetch(`${baseurl}/my-surveys`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -69,7 +70,7 @@ export default function MySurveys() {
     }
 
     try {
-      const res = await fetch(`http://127.0.0.1:8000/surveys/${id}`, {
+      const res = await fetch(`${baseurl}/surveys/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,

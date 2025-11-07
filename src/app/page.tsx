@@ -1,9 +1,34 @@
 "use client"
+import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import Image from "next/image";
 
 
 export default function Home() {
+  const [backendReady, setBackendReady] = useState(false);
+  const baseurl = process.env.NEXT_PUBLIC_API_BASE_URL
+
+  useEffect(() => {
+    async function wakeBackend() {
+      try {
+        const res = await fetch(`${baseurl}/ping`);
+        if (res.ok) setBackendReady(true);
+        else throw new Error("Backend sleeping");
+      } catch {
+        setTimeout(wakeBackend, 4000);
+      }
+    }
+    wakeBackend();
+  }, []);
+
+  if (!backendReady) {
+    return (
+      <div className="h-screen flex flex-col justify-center items-center bg-blue-50">
+        <h1 className="text-3xl font-bold mb-3">Waking up the server...</h1>
+        <p className="text-gray-600">This might take 20–40 seconds on Render free plan.</p>
+      </div>
+    );
+  }
   return (
     <div className="h-screen">
       <Header></Header>

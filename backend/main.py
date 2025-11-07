@@ -9,11 +9,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Dict, Any
 import os
 from dotenv import load_dotenv
+from bson import ObjectId
 
-# Load env variables
 load_dotenv()
 
-# CONFIG
 SECRET_KEY = os.getenv("SECRET_KEY", "your_secret_key")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
@@ -31,7 +30,6 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 app = FastAPI()
 
-# Allow frontend to talk to backend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -40,12 +38,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# OAuth2 scheme for JWT extraction
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-# ============================
-# Models
-# ============================
 class User(BaseModel):
     username: str
     password: str
@@ -65,9 +59,6 @@ class Survey(BaseModel):
     description: str
     questions: List[Question]
 
-# ============================
-# Utils
-# ============================
 def hash_password(password: str):
     return pwd_context.hash(password)
 
@@ -90,9 +81,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
 
-# ============================
-# Auth Routes
-# ============================
 @app.post("/register")
 async def register(user: User):
     existing = await users_collection.find_one({"username": user.username})
@@ -113,14 +101,10 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-
-# ============================
-# Survey Routes
-# ============================
 @app.post("/surveys")
 async def create_survey(survey: Survey, username: str = Depends(get_current_user)):
     survey_data = survey.dict()
-    survey_data["createdBy"] = username  # ✅ tie survey to user
+    survey_data["createdBy"] = username  
     result = await surveys_collection.insert_one(survey_data)
     return {"id": str(result.inserted_id), "message": "Survey created"}
 
@@ -131,7 +115,7 @@ async def get_my_surveys(username: str = Depends(get_current_user)):
         s["_id"] = str(s["_id"])
     return surveys
 
-from bson import ObjectId
+
 
 @app.delete("/surveys/{survey_id}")
 async def delete_survey(survey_id: str, username: str = Depends(get_current_user)):
@@ -148,14 +132,14 @@ async def delete_survey(survey_id: str, username: str = Depends(get_current_user
 
 @app.get("/all-surveys")
 async def get_all_surveys(username: str = Depends(get_current_user)):
-    # Get surveys not created by current user
+
     surveys = await surveys_collection.find({"createdBy": {"$ne": username}}).to_list(100)
     for s in surveys:
-        s["_id"] = str(s["_id"])  # convert ObjectId → string
+        s["_id"] = str(s["_id"])  
     return surveys
 
 class Response(BaseModel):
-    answers: Dict[str, Any]  # only answers from user
+    answers: Dict[str, Any]  
 
 @app.post("/responses/{survey_id}")
 async def submit_response(survey_id: str, response: Response, username: str = Depends(get_current_user)):
@@ -175,6 +159,7 @@ async def get_survey(survey_id: str, username: str = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Survey not found")
     survey["_id"] = str(survey["_id"])
     return survey
+
 @app.get("/getresponses/{survey_id}")
 async def get_responses(survey_id: str, username: str = Depends(get_current_user)):
     survey = await surveys_collection.find_one({"_id": ObjectId(survey_id)})
@@ -183,12 +168,14 @@ async def get_responses(survey_id: str, username: str = Depends(get_current_user
     if survey["createdBy"] != username:
         raise HTTPException(status_code=403, detail="Not authorized to view responses")
 
-    # Convert survey _id to string
     survey["_id"] = str(survey["_id"])
 
-    # Convert response _id to string
     responses = await responses_collection.find({"survey_id": survey_id}).to_list(100)
     for r in responses:
         r["_id"] = str(r["_id"])
 
     return {"survey": survey, "responses": responses}
+
+@app.get("/ping")
+async def ping():
+    return {"status": "ok"}

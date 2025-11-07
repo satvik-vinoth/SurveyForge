@@ -20,8 +20,8 @@ export default function CreateSurveyPage() {
   const [success, setSuccess] = useState("");
 
   const router = useRouter();
+  const baseurl = process.env.NEXT_PUBLIC_API_BASE_URL
 
-  // Add a new question
   const addQuestion = () => {
     setQuestions((prev) => [
       ...prev,
@@ -29,7 +29,6 @@ export default function CreateSurveyPage() {
     ]);
   };
 
-  // Update a question field
   const updateQuestion = <K extends keyof Question>(
     index: number,
     field: K,
@@ -40,7 +39,6 @@ export default function CreateSurveyPage() {
     );
   };
 
-  // Add option
   const addOption = (qIndex: number) => {
     setQuestions((prev) =>
       prev.map((q, i) =>
@@ -49,7 +47,6 @@ export default function CreateSurveyPage() {
     );
   };
 
-  // Update option
   const updateOption = (qIndex: number, optIndex: number, value: string) => {
     setQuestions((prev) =>
       prev.map((q, i) =>
@@ -65,7 +62,6 @@ export default function CreateSurveyPage() {
     );
   };
 
-  // Submit survey
   const handleSubmit = async () => {
     setError("");
     setSuccess("");
@@ -84,7 +80,7 @@ export default function CreateSurveyPage() {
     const newSurvey = { title, description, questions };
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/surveys", {
+      const res = await fetch(`${baseurl}/surveys`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,7 +101,6 @@ export default function CreateSurveyPage() {
       setDescription("");
       setQuestions([]);
 
-      // Redirect after short delay
       setTimeout(() => {
         router.push("/my-surveys");
       }, 1500);
@@ -125,7 +120,6 @@ export default function CreateSurveyPage() {
         </h1>
 
         <div className="bg-white shadow-md rounded-xl p-6 space-y-6">
-          {/* Survey Title & Description */}
           <div>
             <label className="block font-semibold mb-1">Survey Title</label>
             <input
@@ -145,7 +139,6 @@ export default function CreateSurveyPage() {
             ></textarea>
           </div>
 
-          {/* Questions Section */}
           <div>
             <h2 className="text-xl font-bold mb-3">Questions</h2>
             {questions.map((q, qi) => (
@@ -221,11 +214,9 @@ export default function CreateSurveyPage() {
             </button>
           </div>
 
-          {/* Messages */}
           {error && <p className="text-red-600 text-sm">{error}</p>}
           {success && <p className="text-green-600 text-sm">{success}</p>}
 
-          {/* Save */}
           <div className="flex justify-end">
             <button
               onClick={handleSubmit}

@@ -5,12 +5,13 @@ export default function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClo
   const [isRegister, setIsRegister] = useState(false);
   const [form, setForm] = useState({ username: "", password: "" });
   const [message, setMessage] = useState("");
+  const baseurl = process.env.NEXT_PUBLIC_API_BASE_URL
 
   if (!isOpen) return null;
 
   const handleSubmit = async () => {
     setMessage(""); 
-    const url = isRegister ? "http://localhost:8000/register" : "http://localhost:8000/login";
+    const url = isRegister ? `${baseurl}/register` : `${baseurl}/login`;
     const options: RequestInit = {
       method: "POST",
       headers: { "Content-Type": "application/json" },

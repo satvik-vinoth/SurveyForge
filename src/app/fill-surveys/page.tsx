@@ -23,6 +23,7 @@ export default function FillSurveys() {
   const [surveys, setSurveys] = useState<Survey[]>([]);
   const [error, setError] = useState("");
   const router = useRouter();
+  const baseurl = process.env.NEXT_PUBLIC_API_BASE_URL
 
   useEffect(() => {
     const fetchSurveys = async () => {
@@ -33,7 +34,7 @@ export default function FillSurveys() {
       }
 
       try {
-        const res = await fetch("http://127.0.0.1:8000/all-surveys", {
+        const res = await fetch(`${baseurl}/all-surveys`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

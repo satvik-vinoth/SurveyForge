@@ -26,6 +26,7 @@ export default function SurveyPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [invalidQuestions, setInvalidQuestions] = useState<string[]>([]);
+  const baseurl = process.env.NEXT_PUBLIC_API_BASE_URL
 
   useEffect(() => {
     const fetchSurvey = async () => {
@@ -36,7 +37,7 @@ export default function SurveyPage() {
       }
 
       try {
-        const res = await fetch(`http://127.0.0.1:8000/survey/${id}`, {
+        const res = await fetch(`${baseurl}/survey/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

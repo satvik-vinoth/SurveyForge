@@ -29,6 +29,7 @@ export default function ResponsesPage() {
   const [survey, setSurvey] = useState<Survey | null>(null);
   const [responses, setResponses] = useState<ResponseData[]>([]);
   const [error, setError] = useState("");
+  const baseurl = process.env.NEXT_PUBLIC_API_BASE_URL
 
   useEffect(() => {
     const fetchResponses = async () => {
@@ -39,7 +40,7 @@ export default function ResponsesPage() {
       }
 
       try {
-        const res = await fetch(`http://127.0.0.1:8000/getresponses/${id}`, {
+        const res = await fetch(`${baseurl}/getresponses/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
