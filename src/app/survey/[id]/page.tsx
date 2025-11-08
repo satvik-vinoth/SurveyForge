@@ -60,7 +60,7 @@ export default function SurveyPage() {
 
   const handleChange = (qText: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [qText]: value }));
-    setInvalidQuestions((prev) => prev.filter((q) => q !== qText)); // clear highlight when answered
+    setInvalidQuestions((prev) => prev.filter((q) => q !== qText)); 
   };
 
   const handleSubmit = async () => {
@@ -70,7 +70,6 @@ export default function SurveyPage() {
 
     if (!survey) return;
 
-    // 🔴 Validate required questions
     const missing = survey.questions
       .filter((q) => q.required && (!answers[q.text] || answers[q.text].trim() === ""))
       .map((q) => q.text);
@@ -88,7 +87,7 @@ export default function SurveyPage() {
     }
 
     try {
-      const res = await fetch(`http://127.0.0.1:8000/responses/${survey._id}`, {
+      const res = await fetch(`${baseurl}/responses/${survey._id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
