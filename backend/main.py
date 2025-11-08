@@ -10,6 +10,8 @@ from typing import List, Dict, Any
 import os
 from dotenv import load_dotenv
 from bson import ObjectId
+from fastapi import Request
+from fastapi.responses import JSONResponse
 
 load_dotenv()
 
@@ -179,3 +181,7 @@ async def get_responses(survey_id: str, username: str = Depends(get_current_user
 @app.get("/ping")
 async def ping():
     return {"status": "ok"}
+
+@app.options("/{rest_of_path:path}")
+async def preflight_handler(request: Request):
+    return JSONResponse(status_code=200, content={"ok": True})
