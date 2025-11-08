@@ -11,7 +11,8 @@ import os
 from dotenv import load_dotenv
 from bson import ObjectId
 from fastapi import Request
-from fastapi.responses import JSONResponse
+from fastapi import Response
+
 
 load_dotenv()
 
@@ -184,4 +185,4 @@ async def ping():
 
 @app.options("/{rest_of_path:path}")
 async def preflight_handler(request: Request):
-    return JSONResponse(status_code=200, content={"ok": True})
+    return Response(status_code=200)
