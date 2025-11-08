@@ -1,55 +1,67 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 
 export default function LoginModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const [isRegister, setIsRegister] = useState(false);
   const [form, setForm] = useState({ username: "", password: "" });
   const [message, setMessage] = useState("");
-  const baseurl = process.env.NEXT_PUBLIC_API_BASE_URL
+  const baseurl = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const router = useRouter();
 
   if (!isOpen) return null;
 
   const handleSubmit = async () => {
-    setMessage(""); 
-    const url = isRegister ? `${baseurl}/register` : `${baseurl}/login`;
-    const options: RequestInit = {
+  setMessage("");
+  const url = isRegister ? `${baseurl}/register` : `${baseurl}/login`;
+
+  let options: RequestInit;
+
+  if (isRegister) {
+    options = {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     };
+  } else {
+    const formData = new URLSearchParams();
+    formData.append("username", form.username);
+    formData.append("password", form.password);
+    options = {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData,
+    };
+  }
 
-    if (!isRegister) {
-      const formData = new URLSearchParams();
-      formData.append("username", form.username);
-      formData.append("password", form.password);
-      options.body = formData;
-      options.headers = {};
+  try {
+    const res = await fetch(url, options);
+    const data = await res.json();
+
+    if (!res.ok) {
+      setMessage(data.detail || "Something went wrong");
+      return;
     }
 
-    try {
-      const res = await fetch(url, options);
-      const data = await res.json();
-
-      if (!res.ok) {
-        setMessage(data.detail || "Something went wrong");
-        return;
-      }
-
-      if (isRegister) {
-        setMessage("Registration successful. Switch to login.");
-        setIsRegister(false);
-      } else {
-        localStorage.setItem("token", data.access_token);
-        setMessage("Login successful.");
-        setTimeout(() => {
-          setMessage("");
-          onClose();
-        }, 1000);
-      }
-    } catch (err) {
-      setMessage("Network error");
+    if (isRegister) {
+      setMessage("Registration successful. Switch to login.");
+      setIsRegister(false);
+    } else {
+      localStorage.setItem("token", data.access_token);
+      setMessage("Login successful.");
+      setTimeout(() => {
+        setMessage("");
+        onClose();
+        router.push("/");
+        router.refresh();
+      }, 1000);
     }
-  };
+  } catch (err) {
+    setMessage("Network error");
+  }
+};
+
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

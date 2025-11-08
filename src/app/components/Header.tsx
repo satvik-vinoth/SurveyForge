@@ -3,11 +3,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import LoginModal from "./LoginModal";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const [showLogin, setShowLogin] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false); 
+  const router = useRouter();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -19,6 +21,8 @@ export default function Header() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
+    router.push("/");
+    router.refresh();
   };
 
   const menu = [
